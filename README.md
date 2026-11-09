@@ -30,3 +30,7 @@ Open index.html through a local web server. The enhancement.js file adds 12 arch
 
 ## Version 3.1
 Open index.html through a local web server. The enhancement.js file adds 12 archetypes, BM/EN content and demo interactions. Demo forms do not submit to a backend. Browser end-to-end tests are pending; see PDF blueprint.
+
+
+## v3.3 visual integration
+Added individually generated transparent 3D icon assets, Web Wizard hero artwork, and top-aligned Studio controls to provide a wider preview. Icons are decorative and do not change existing generator behavior. Test in browser before production deployment.
