@@ -1,10 +1,11 @@
-# Web Wizard Studio v3.0
+# Web Wizard Studio v3.1
 
 Open `index.html` in a modern browser. No build process is required. Google Fonts requires internet access; fallback fonts work offline.
 
 ## Included
-- Editorial creative-agency welcome page
-- Eight website archetypes
+- Editorial creative-agency welcome page, fully localised in BM and EN
+- Bilingual Studio interface (`interface-i18n.js`)
+- Twelve website archetypes with BM/EN sample content
 - Six visually differentiated design directions
 - Live isolated iframe preview with 1200 / 810 / 390px viewports
 - Editable hero copy, colour overrides and local reference-image accent sampling
