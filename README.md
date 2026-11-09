@@ -17,3 +17,15 @@ The website content is demonstration content. Buttons within generated pages nav
 
 ## Files
 `index.html`, `style.css`, `script.js`, `assets/` (reserved for future hero/icon art).
+
+
+## Version 3.1
+Open index.html through a local web server. The enhancement.js file adds 12 archetypes, BM/EN content and demo interactions. Demo forms do not submit to a backend. Browser end-to-end tests are pending; see PDF blueprint.
+
+
+## Version 3.1
+Open index.html through a local web server. The enhancement.js file adds 12 archetypes, BM/EN content and demo interactions. Demo forms do not submit to a backend. Browser end-to-end tests are pending; see PDF blueprint.
+
+
+## Version 3.1
+Open index.html through a local web server. The enhancement.js file adds 12 archetypes, BM/EN content and demo interactions. Demo forms do not submit to a backend. Browser end-to-end tests are pending; see PDF blueprint.
