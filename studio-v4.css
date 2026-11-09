@@ -26,3 +26,49 @@
 .v4-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
 .v4-action-art{width:28px;height:28px;object-fit:contain;flex-shrink:0}
 .gallery-3d-icon{object-fit:contain}
+
+/* v4.1: single export, numbered steps, hero image, next-step note */
+#export-btn{display:none!important}
+.v4-tool{position:relative}
+.v4-step{position:absolute;top:6px;left:8px;width:20px;height:20px;border-radius:50%;background:#19243b;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
+.v4-tool.selected .v4-step{background:#ff6c5b}
+.v4-hint{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:#f0eaff;color:#3d2a66;font-size:13px;line-height:1.5}
+.v4-fields .field-label{font-size:12px}
+.v4-fields .group-label{display:block;font-weight:800;margin-bottom:8px}
+.v4-fields .small-link{font-size:13px;cursor:pointer}
+.v4-fields .upload-wrap label{font-size:13px}.v4-fields .upload-wrap small{font-size:12px}.v4-fields .upload-wrap input{font-size:13px!important}
+.hero-thumb{display:block;max-width:180px;max-height:110px;border-radius:8px;margin:4px 0 8px;object-fit:cover}
+.hero-thumb[hidden],#hero-remove[hidden]{display:none!important}
+.v4-section-item.is-hidden{opacity:.55}
+.v4-section-foot{display:flex;flex-wrap:wrap;gap:8px}
+.v4-section-actions button{min-width:36px;min-height:36px}
+.v4-next{margin-top:12px;padding:14px 16px;border-radius:14px;background:#e6f7ed;border:1px solid #9fd8b8;color:#143d2b;font-size:14px;line-height:1.55;display:grid;gap:8px}
+.v4-next[hidden]{display:none!important}
+.v4-next ol{margin:0;padding-left:20px}
+.v4-next a{font-weight:800;color:#0d5a3a}
+.v4-next .v4-close{justify-self:start}
+
+/* v4.1: sample websites (same images as the Web Wizard PoliPD gallery) */
+.style-option{display:flex;flex-direction:column;gap:6px}
+.style-sample{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:6px;border:1px solid #e5e5e5;display:block}
+.style-sample-tag{font-size:11px;color:#777;font-weight:600}
+.v41-styles{text-align:left}
+.v41-styles h2{margin:.2em 0 .3em}
+.v41-styles-lead{max-width:60ch;color:#56565c;font-size:16px;line-height:1.6;margin:0 0 22px}
+.v41-styles-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.v41-style-card{display:flex;flex-direction:column;gap:10px;padding:12px;background:#fff;border:2px solid #19243b;border-radius:18px;box-shadow:5px 5px 0 #19243b;cursor:pointer;text-align:left;font:inherit;transition:transform .15s,box-shadow .15s}
+.v41-style-card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 #ff6c5b}
+.v41-style-card:focus-visible{outline:3px solid #345cde;outline-offset:3px}
+.v41-style-card img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:10px;display:block}
+.v41-style-tag{font:700 13px/1.3 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.02em;color:#19243b}
+.v41-style-go{font-weight:800;font-size:14px;color:#b84c3c}
+@media(max-width:760px){.v41-styles-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.v41-style-card{transition:none}}
+.v4-panel{max-height:430px}
+@media(max-width:700px){.v4-panel{max-height:340px}}
+
+/* v4.1: 3D toolbar icons */
+.v4-tool-symbol.has-art{width:56px;height:56px;background:transparent!important;border-radius:0}
+.v4-tool-symbol.has-art img{width:56px;height:56px;object-fit:contain;display:block}
+.v4-tool{min-height:96px}
+@media(max-width:700px){.v4-tool-symbol.has-art,.v4-tool-symbol.has-art img{width:46px;height:46px}.v4-tool{min-height:82px}}
