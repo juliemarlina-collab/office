@@ -3,7 +3,24 @@
 const $=id=>document.getElementById(id),studio=$('studio'),body=studio?.querySelector('.studio-body'),controls=body?.querySelector('.controls'),preview=body?.querySelector('.preview-stage');
 if(!studio||!body||!controls||!preview)return;
 const groups=[...controls.querySelectorAll(':scope > .control-group')],KEY='wws-v4-project',labels=[['layout-template','Type','Jenis','Choose a website category'],['paintbrush','Style','Gaya','Select a visual direction'],['type','Content','Kandungan','Edit headline and buttons'],['palette','Colours','Warna','Set your brand palette'],['settings','More','Lanjutan','Additional settings']];
-const iconNames=['browser','typography','templates','home','analytics','launch','download','cloud-upload','html','palette','javascript','responsive'];
+// Gallery artwork is mapped by the actual website category ID, never by position.
+const galleryIcons={
+ agency:'browser', portfolio:'typography', lms:'education-books',
+ office:'home', dashboard:'education-growth', conference:'event-trophy',
+ ecommerce:'download', saas:'cloud-upload', blog:'html',
+ landing:'campaign-target', games:'javascript', community:'responsive'
+};
+// Purpose-specific vector icons for editing actions: consistent, readable and not decorative.
+const toolPaths={
+  type:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  style:'<path d="M12 3a9 9 0 1 0 9 9c0-1.7-1.2-2.5-2.6-2.5H16a2 2 0 0 1-2-2V5.6A2.6 2.6 0 0 0 12 3Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="16.5" cy="13.5" r="1"/><circle cx="10.5" cy="16.5" r="1"/>',
+  content:'<path d="M4 6h16M4 12h16M4 18h10"/><path d="M7 3v6"/>',
+  colours:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/><path d="m5.6 5.6 12.8 12.8"/>',
+  more:'<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="16" cy="17" r="2"/>',
+  sections:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12M13 14h5M13 18h5"/>'
+};
+function toolSvg(id){return '<svg aria-hidden="true" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+toolPaths[id]+'</svg>'}
+
 function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
 const root=node('section','v4-workspace');root.innerHTML='<div class="v4-intro"><div><strong>Build your website</strong><p>Choose one tool, edit one part at a time. Your canvas stays in view.</p></div><div class="v4-status" id="v4-status" aria-live="polite">Ready</div></div>';
 const bar=node('div','v4-toolbar');bar.setAttribute('aria-label','Website editing tools');const panel=node('div','v4-panel');panel.hidden=true;const panelHeader=node('div','v4-panel-header');const panelTitle=node('strong','', '');const close=node('button','v4-close','✕ Close');close.type='button';panelHeader.append(panelTitle,close);const fields=node('div','v4-fields');panel.append(panelHeader,fields);root.append(bar,panel);body.insertBefore(root,preview);
@@ -23,13 +40,27 @@ function drawEditor(){const old=fields.querySelector('.v4-section-editor');if(ol
 const originalTemplate=templateHtml;templateHtml=function(){const result=originalTemplate();const s=getState();if(!s)return result;ensureSections();const list=sections[s.type];const css='\n<style id="v4-generated-style">.v4-custom-sections{padding:55px max(5%,24px);background:var(--surface,#fff);color:var(--text,#111)}.v4-custom-section{max-width:1100px;margin:0 auto 32px;padding:28px;border:1px solid currentColor;border-radius:16px}.v4-custom-section h2{font-size:clamp(24px,3vw,40px);margin:0 0 12px}.v4-custom-section p{line-height:1.7;max-width:70ch}</style>';
 const html='<div class="v4-custom-sections">'+list.filter(x=>x.visible).map(x=>'<section class="v4-custom-section"><h2>'+escapeHtml(x.title)+'</h2><p>'+escapeHtml(x.desc)+'</p></section>').join('')+'</div>';
 result.html=result.html.replace('</head>',css+'</head>').replace('</footer>', '</footer>'+html);return result};
-const tools=[...labels.map((x,i)=>({id:'tool'+i,label:x[1],hint:x[3],icon:iconNames[[2,9,1,9,4][i]],indices:i===4?groups.map((_,j)=>j).filter(j=>j>=4):[i]})),{id:'sections',label:'Sections',hint:'Edit page sections',icon:'templates',indices:[]}];
+const tools=[...labels.map((x,i)=>({id:'tool'+i,label:x[1],hint:x[3],icon:['type','style','content','colours','more'][i],indices:i===4?groups.map((_,j)=>j).filter(j=>j>=4):[i]})),{id:'sections',label:'Sections',hint:'Edit page sections',icon:'sections',indices:[]}];
 function activate(id){active=active===id?null:id;panel.hidden=!active;bar.querySelectorAll('button').forEach(b=>{const selected=b.dataset.tool===active;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});groups.forEach(g=>controls.append(g));fields.replaceChildren();if(!active)return;const t=tools.find(x=>x.id===active);panelTitle.textContent=t.label+' · '+t.hint;t.indices.forEach(i=>{if(groups[i])fields.append(groups[i])});if(active==='sections')fields.append(editor());}
-for(const t of tools){const b=node('button','v4-tool');b.type='button';b.dataset.tool=t.id;b.title=t.hint;b.setAttribute('aria-pressed','false');const img=node('img');img.src='assets/icons/'+t.icon+'.webp';img.alt='';img.onerror=()=>{img.style.display='none'};b.append(img,node('span','',t.label));b.onclick=()=>activate(t.id);bar.append(b)}close.onclick=()=>activate(active);
-function gallery(){document.querySelectorAll('#model-gallery .model-card').forEach((card,i)=>{const art=card.querySelector('.thumb-shape');if(!art)return;const img=node('img','gallery-3d-icon');img.src='assets/icons/'+iconNames[i%iconNames.length]+'.webp';img.alt='';img.onerror=()=>{img.remove();art.textContent='✳'};art.replaceChildren(img)})}gallery();
+for(const t of tools){const b=node('button','v4-tool');b.type='button';b.dataset.tool=t.id;b.title=t.hint;b.setAttribute('aria-pressed','false');const glyph=node('span','v4-tool-symbol');glyph.innerHTML=toolSvg(t.icon);b.append(glyph,node('span','',t.label));b.onclick=()=>activate(t.id);bar.append(b)}close.onclick=()=>activate(active);
+function gallery(){document.querySelectorAll('#model-gallery .model-card').forEach(card=>{
+  const art=card.querySelector('.thumb-shape');if(!art)return;
+  const key=card.dataset.gallery,icon=galleryIcons[key];
+  if(!icon)return;
+  const img=node('img','gallery-3d-icon');img.src='assets/icons/'+icon+'.webp';
+  img.alt='';img.loading='lazy';
+  img.onerror=()=>{img.remove();art.textContent='✳'};
+  art.replaceChildren(img);
+})}gallery();
 function restore(){try{const raw=localStorage.getItem(KEY);if(!raw)return;const p=JSON.parse(raw),s=getState();if(!s||!p)return;if(p.type in types)s.type=p.type;if(p.style in styles)s.style=p.style;if(p.overrides&&typeof p.overrides==='object')s.overrides=p.overrides;if(p.colors&&typeof p.colors==='object')s.colors=p.colors;if(['desktop','tablet','mobile'].includes(p.device))s.device=p.device;if(p.sections&&typeof p.sections==='object')sections=p.sections;render();status.textContent='✓ Project restored'}catch(e){status.textContent='Unable to restore project'}}restore();
 body.addEventListener('input',later,true);body.addEventListener('change',later,true);body.addEventListener('click',later,true);document.querySelectorAll('[data-device]').forEach(b=>b.addEventListener('click',later));window.addEventListener('beforeunload',save);
 const actions=node('div','v4-actions');actions.innerHTML='<button type="button" id="v4-save">Save project</button><button type="button" id="v4-open">Open project</button><button type="button" id="v4-check">Check website</button><button type="button" id="v4-zip" class="v4-primary">Export ZIP ↓</button><input id="v4-file" type="file" accept=".json,application/json" hidden>';root.append(actions);
+// Use supplied 3D artwork only where the icon accurately describes the action.
+for(const [id,assetName] of [['v4-check','quality-check'],['v4-zip','export-download']]){
+ const button=$(id);if(!button)continue;
+ const art=node('img','v4-action-art');art.src='assets/icons/'+assetName+'.webp';art.alt='';art.loading='lazy';
+ button.prepend(art);
+}
 function download(filename,blob){const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
 $('v4-save').onclick=()=>{save();download('web-wizard-project.json',new Blob([localStorage.getItem(KEY)||'{}'],{type:'application/json'}))};$('v4-open').onclick=()=>$('v4-file').click();$('v4-file').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const p=JSON.parse(await f.text());if(!p||p.version!==4||!(p.type in types)||!(p.style in styles))throw Error('Invalid project');const s=getState();s.type=p.type;s.style=p.style;s.overrides=p.overrides||{};s.colors=p.colors||{};s.device=['desktop','tablet','mobile'].includes(p.device)?p.device:'desktop';sections=p.sections||{};render();activate(active);save();status.textContent='✓ Project opened'}catch(err){alert('Unable to open this Web Wizard project: '+err.message)}e.target.value=''};
 $('v4-check').onclick=()=>{const s=getState(),d=data(),issues=[];if(!d.title?.trim())issues.push('Add a website headline');if(!d.desc?.trim())issues.push('Add a short introduction');if(!d.cta?.trim())issues.push('Add primary button text');if(!sections[s.type]?.some(x=>x.visible))issues.push('Show at least one section');alert(issues.length?'Before publishing:\n• '+issues.join('\n• '):'Basic content checks passed. Please also test navigation, images, accessibility and mobile layout manually.')};
