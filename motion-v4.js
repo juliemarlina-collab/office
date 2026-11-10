@@ -1,10 +1,8 @@
 
 (()=>{'use strict';
 const labels=[
- ['agency','Business & Agency','browser'],['portfolio','Portfolio','typography'],['lms','Education & LMS','education-books'],
- ['office','Institutional Portal','home'],['dashboard','Analytics Dashboard','education-growth'],['conference','Events & Conferences','event-trophy'],
- ['ecommerce','E-Commerce','export-download'],['saas','SaaS & Collaboration','cloud-upload'],['blog','Blog & Magazine','html'],
- ['landing','Campaign Landing','campaign-target'],['games','Educational Games','javascript'],['community','Community & Nonprofit','responsive']
+ ['lms','Teaching & learning site','education-books'],['office','Work management site','home'],
+ ['conference','Event','event-trophy'],['portfolio','Portfolio','typography']
 ];
 const track=document.getElementById('v403-marquee-track');
 if(track){
@@ -21,7 +19,7 @@ if(track){
   });
   return btn;
  };
- for(let repeat=0;repeat<2;repeat++)for(const [key,label,icon] of labels)track.append(make(key,label,icon,repeat>0));
+ for(let repeat=0;repeat<4;repeat++)for(const [key,label,icon] of labels)track.append(make(key,label,icon,repeat>0));
 }
 const steps=[...document.querySelectorAll('.v403-steps article')],fill=document.querySelector('.v403-progress-fill');
 if('IntersectionObserver'in window&&steps.length){

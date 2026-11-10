@@ -1,4 +1,4 @@
-/* Web Wizard Studio 4.1 — workspace: numbered tools, section editor, autosave, project files, ZIP export.
+/* Web Wizard Studio 4.2 — workspace: numbered tools, section editor, autosave, project files, ZIP export.
    Loads last, after script.js, enhancement.js, interface-i18n.js and site-template.js. */
 (function(){'use strict';
 const $=id=>document.getElementById(id),studio=$('studio'),body=studio?.querySelector('.studio-body'),controls=body?.querySelector('.controls'),preview=body?.querySelector('.preview-stage');
@@ -26,7 +26,7 @@ function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.classNa
 const tools=[
  {id:'tool0',icon:'type',bm:'Jenis',en:'Type',hbm:'Pilih jenis laman web',hen:'Choose a website type',indices:[0]},
  {id:'tool1',icon:'style',bm:'Gaya',en:'Style',hbm:'Pilih gaya reka bentuk',hen:'Choose a design style',indices:[1]},
- {id:'tool2',icon:'content',bm:'Kandungan',en:'Content',hbm:'Nama laman, tajuk, butang dan imej',hen:'Site name, headline, button and image',indices:[2]},
+ {id:'tool2',icon:'content',bm:'Kandungan',en:'Content',hbm:'Nama laman, tajuk, butang dan imej utama',hen:'Site name, headline, button and image',indices:[2]},
  {id:'sections',icon:'sections',bm:'Bahagian',en:'Sections',hbm:'Sunting bahagian laman',hen:'Edit the page sections',indices:[]},
  {id:'tool3',icon:'colours',bm:'Warna',en:'Colours',hbm:'Tukar warna laman',hen:'Change the site colours',indices:[3]},
  {id:'tool4',icon:'image',bm:'Imej AI',en:'AI image',hbm:'Prompt untuk menjana imej',hen:'Prompts for generating images',indices:groups.map((_,j)=>j).filter(j=>j>=4)}
@@ -41,7 +41,7 @@ const hint=node('p','v4-hint','');hint.hidden=true;
 const fields=node('div','v4-fields');panel.append(panelHeader,hint,fields);root.append(bar,panel);body.insertBefore(root,preview);
 controls.style.display='none';body.querySelector('.workspace-tools')?.remove();
 let active=null,sections={},pending=null,statusKey='ready';const status=$('v4-status');
-const STATUS={ready:['Sedia','Ready'],saving:['Menyimpan…','Saving…'],saved:['✓ Disimpan automatik','✓ Autosaved'],restored:['✓ Projek dipulihkan','✓ Project restored'],opened:['✓ Projek dibuka','✓ Project opened'],zip:['✓ ZIP dimuat turun','✓ ZIP downloaded'],nostore:['Storan penuh. Tekan Simpan projek.','Storage is full. Press Save project.'],norestore:['Projek tidak dapat dipulihkan','Unable to restore project']};
+const STATUS={ready:['Sedia','Ready'],saving:['Menyimpan…','Saving…'],saved:['✓ Disimpan secara automatik','✓ Autosaved'],restored:['✓ Projek dipulihkan','✓ Project restored'],opened:['✓ Projek dibuka','✓ Project opened'],zip:['✓ ZIP dimuat turun','✓ ZIP downloaded'],nostore:['Storan penuh. Tekan Simpan projek.','Storage is full. Press Save project.'],norestore:['Projek tidak dapat dipulihkan','Unable to restore project']};
 function setStatus(k){statusKey=k;status.textContent=B(STATUS[k][0],STATUS[k][1])}
 
 /* ---------- sections: one list drives the preview, the menu and the export ---------- */
@@ -58,11 +58,11 @@ function refresh(){if(typeof renderPreview==='function')renderPreview();later()}
 function editor(){
  ensureSections();const list=sections[state.type];
  const wrap=node('div','v4-section-editor');
- const head=node('div','v4-section-head');head.append(node('b','',B('Bahagian laman','Page sections')),node('span','',B('Sunting, sembunyi, susun semula atau buang bahagian. Menu laman ikut senarai ini.','Edit, hide, reorder or remove sections. The site menu follows this list.')));wrap.append(head);
+ const head=node('div','v4-section-head');head.append(node('b','',B('Bahagian laman','Page sections')),node('span','',B('Sunting, sembunyikan, susun semula atau buang bahagian. Menu laman mengikut senarai ini.','Edit, hide, reorder or remove sections. The site menu follows this list.')));wrap.append(head);
  list.forEach((sec,i)=>{
   const r=resolve(state.type,sec),item=node('div','v4-section-item'+(sec.visible?'':' is-hidden')),row=node('div','v4-section-row');
   const name=node('strong','',(i+1)+'. '+(r.title||B('Tanpa tajuk','Untitled'))),actions=node('div','v4-section-actions');
-  [['↑',B('Naik','Move up'),()=>move(i,-1)],['↓',B('Turun','Move down'),()=>move(i,1)],[sec.visible?'◉':'◌',sec.visible?B('Sembunyi','Hide'):B('Papar','Show'),()=>{sec.visible=!sec.visible;drawEditor();refresh()}],['✕',B('Buang','Remove'),()=>{list.splice(i,1);drawEditor();refresh()}]].forEach(([glyph,title,fn])=>{const b=node('button','',glyph);b.type='button';b.title=title;b.setAttribute('aria-label',title+': '+(r.title||''));b.onclick=fn;actions.append(b)});
+  [['↑',B('Alih ke atas','Move up'),()=>move(i,-1)],['↓',B('Alih ke bawah','Move down'),()=>move(i,1)],[sec.visible?'◉':'◌',sec.visible?B('Sembunyikan','Hide'):B('Paparkan','Show'),()=>{sec.visible=!sec.visible;drawEditor();refresh()}],['✕',B('Buang','Remove'),()=>{list.splice(i,1);drawEditor();refresh()}]].forEach(([glyph,title,fn])=>{const b=node('button','',glyph);b.type='button';b.title=title;b.setAttribute('aria-label',title+': '+(r.title||''));b.onclick=fn;actions.append(b)});
   row.append(name,actions);
   const l1=node('label','v4-field-label',B('Tajuk bahagian','Section title')),inp=node('input');inp.value=r.title;inp.maxLength=100;inp.id='v4-sec-t'+i;l1.htmlFor=inp.id;
   inp.oninput=()=>{sec.title=inp.value;name.textContent=(i+1)+'. '+(inp.value||B('Tanpa tajuk','Untitled'));refresh()};
@@ -113,11 +113,11 @@ function relabel(){
  $('v4-open').lastElementChild.textContent=B('Buka projek','Open project');
  $('v4-check').lastElementChild.textContent=B('Semak laman','Check website');
  $('v4-zip').lastElementChild.textContent=B('Muat turun ZIP ↓','Download ZIP ↓');
- const foot=document.querySelector('.hero-footnote');if(foot)foot.innerHTML=B('12 JENIS LAMAN WEB','12 WEBSITE TYPES')+' <span>✳</span> '+B('3 GAYA REKA BENTUK','3 DESIGN STYLES')+' <span>✳</span> BM / EN';
+ const foot=document.querySelector('.hero-footnote');if(foot)foot.innerHTML=B('4 JENIS LAMAN WEB','4 WEBSITE TYPES')+' <span>✳</span> '+B('3 GAYA REKA BENTUK','3 DESIGN STYLES')+' <span>✳</span> BM / EN';
  setStatus(statusKey);
  if(active){const t=tools.find(x=>x.id===active);paintPanelTitle(t);if(active==='tool4')hint.textContent=B('Salin prompt, tampal dalam ChatGPT atau Claude untuk menjana imej, kemudian muat naik imej itu di langkah 3 Kandungan.','Copy a prompt, paste it into ChatGPT or Claude to generate an image, then upload that image in step 3 Content.')}
  if(!next.hidden)paintNext();
- paintShowcase();
+ paintShowcase();paintFlow();extraLabels();if(typeof paintFill==='function')paintFill();
 }
 function paintNext(){
  next.innerHTML='<strong></strong><ol><li></li><li></li><li></li></ol><a target="_blank" rel="noopener"></a><button type="button" class="v4-close"></button>';
@@ -130,24 +130,131 @@ function paintNext(){
  const x=next.querySelector('button');x.textContent=B('✕ Tutup','✕ Close');x.onclick=()=>{next.hidden=true};
 }
 
-/* Welcome page: the three styles, shown with the PoliPD sample websites. Tap one to start in that style. */
-const SHOW=[['fun','kerja','Pengurusan kerja','Work hub'],['min','acara','Acara','Event'],['bold','portfolio','Portfolio','Portfolio']];
-const showcase=node('section','section v41-styles');showcase.id='styles';
-document.querySelector('#welcome .work-section')?.after(showcase);
+/* ===== Welcome page: moving ring of the 12 sample websites (4 types x 3 styles) (same images and motion idea as Web Wizard PoliPD) ===== */
+const FAM={pdp:['Pembelajaran','Learning','lms'],kerja:['Pengurusan kerja','Work hub','office'],portfolio:['Portfolio','Portfolio','portfolio'],acara:['Acara','Event','conference']};
+const RING=[['pdp','fun'],['kerja','bold'],['portfolio','min'],['acara','fun'],['kerja','fun'],['acara','bold'],['portfolio','bold'],['pdp','min'],['acara','min'],['portfolio','fun'],['pdp','bold'],['kerja','min']];
+const DOT={min:'#1447e6',bold:'#ffc400',fun:'#f97316'};
+const reduced=()=>window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MO={off:0,last:0,raf:0,paused:false,visible:false,drag:null,moved:false,ring:null,cards:[]};
+const showcase=node('section','v41-styles');showcase.id='styles';
+document.querySelector('#welcome .welcome-hero')?.after(showcase);
 function paintShowcase(){
  showcase.replaceChildren();
- showcase.append(node('span','eyebrow',B('TIGA GAYA REKA BENTUK','THREE DESIGN STYLES')));
- const h=node('h2','',B('Pilih gaya yang sesuai dengan anda','Pick the style that suits you'));showcase.append(h);
- showcase.append(node('p','v41-styles-lead',B('Contoh laman web daripada galeri Web Wizard PoliPD. Tekan satu contoh untuk mula membina dalam gaya itu.','Sample websites from the Web Wizard PoliPD gallery. Tap one to start building in that style.')));
- const grid=node('div','v41-styles-grid');
- for(const [style,fam,bm,en] of SHOW){
-  const b=node('button','v41-style-card');b.type='button';
-  const img=node('img');img.src='assets/samples/sample-'+fam+'-'+style+'-sm.webp';img.alt=B('Contoh laman web: ','Sample website: ')+B(bm,en)+', '+styles[style].name;img.loading='lazy';img.width=800;img.height=450;
-  b.append(node('span','v41-style-tag',B(bm,en)+' · '+styles[style].name),img,node('span','v41-style-go',B('Guna gaya ini ↗','Use this style ↗')));
-  b.onclick=()=>{state.style=style;state.colors={};showStudio();later()};
-  grid.append(b);
+ const head=node('div','v41-styles-head');
+ head.append(node('span','eyebrow',B('APA YANG ANDA BOLEH BINA','WHAT YOU CAN BUILD')),node('h2','',B('Empat jenis laman, tiga gaya','Four kinds of site, three styles')),node('p','v41-styles-lead',B('Leret atau tekan mana-mana contoh untuk mula membina dalam gaya itu.','Swipe, or tap any sample to start building in that style.')));
+ const ring=node('div','v41-ring'),track=node('div','v41-track');ring.setAttribute('role','region');ring.setAttribute('aria-label',B('Contoh laman web bergerak','Moving website samples'));
+ for(let rep=0;rep<2;rep++)for(const [fam,style] of RING){
+  const label=B(FAM[fam][0],FAM[fam][1])+' · '+styles[style].name,c=node('button','v41-card');c.type='button';c.setAttribute('aria-label',label);if(rep)c.tabIndex=-1;
+  const chip=node('span','v41-chip'),dot=node('i');dot.style.background=DOT[style];chip.append(dot,document.createTextNode(label));
+  const screen=node('span','v41-screen'),img=node('img');img.src='assets/samples/sample-'+fam+'-'+style+'-sm.webp';img.alt='';img.width=800;img.height=450;img.draggable=false;screen.append(img);
+  c.append(chip,screen);
+  c.onclick=()=>{if(MO.moved)return;state.type=FAM[fam][2];state.style=style;state.colors={};state.overrides={};showStudio();later()};
+  track.append(c);
  }
- showcase.append(grid);
+ ring.append(track);
+ const toolsRow=node('div','v41-ring-tools'),pause=node('button','v41-pause');pause.type='button';
+ const label=()=>{pause.textContent=MO.paused?B('▶ Main','▶ Play'):B('⏸ Jeda','⏸ Pause');pause.setAttribute('aria-pressed',String(MO.paused))};label();
+ pause.onclick=()=>{MO.paused=!MO.paused;label()};
+ toolsRow.append(pause,node('small','',B('12 contoh daripada galeri Web Wizard PoliPD.','12 samples from the Web Wizard PoliPD gallery.')));
+ if(reduced())pause.hidden=true;
+ showcase.append(head,ring,toolsRow);
+ MO.ring=ring;MO.cards=[...track.children];
+ ring.addEventListener('pointerdown',e=>{MO.drag={x:e.clientX,o:MO.off};MO.moved=false});
+ if('IntersectionObserver' in window)new IntersectionObserver(es=>{MO.visible=es[0].isIntersecting;if(MO.visible)moStart()}).observe(ring);else{MO.visible=true}
+ moLayout();moStart();
+}
+function moLayout(){
+ const ring=MO.ring,cards=MO.cards;if(!ring||!cards.length)return;
+ if(reduced()){ring.classList.add('static');return}
+ const w=ring.clientWidth,cw=cards[0].offsetWidth;if(!w||!cw)return;
+ const step=cw+Math.max(14,cw*.08),total=step*cards.length;
+ MO.off=((MO.off%total)+total)%total;
+ cards.forEach((c,i)=>{
+  let x=((i*step-MO.off)%total+total)%total-step;if(x>total-step*1.5)x-=total;
+  const n=Math.max(-1.4,Math.min(1.4,(x+cw/2-w/2)/(w/2)));
+  c.style.transform='translate3d('+x+'px,0,'+(n*n*70)+'px) rotateY('+(n*-24)+'deg) scale('+(1+Math.abs(n)*.06)+')';
+  c.style.zIndex=String(100-Math.round(Math.abs(n)*50));
+ });
+}
+function moTick(t){if(!MO.last)MO.last=t;const dt=Math.min(64,t-MO.last);MO.last=t;if(!MO.paused&&!MO.drag&&MO.visible)MO.off+=dt*.045;moLayout();MO.raf=MO.visible?requestAnimationFrame(moTick):0}
+function moStart(){if(!MO.raf&&!reduced()){MO.last=0;MO.raf=requestAnimationFrame(moTick)}}
+window.addEventListener('pointermove',e=>{if(!MO.drag)return;const dx=e.clientX-MO.drag.x;if(Math.abs(dx)>6)MO.moved=true;MO.off=MO.drag.o-dx;if(!MO.raf)moLayout()});
+window.addEventListener('pointerup',()=>{if(MO.drag){MO.drag=null;setTimeout(()=>{MO.moved=false},50)}});
+window.addEventListener('resize',moLayout);
+
+/* ===== Welcome page: interactive process flow. The rocket travels to the step you choose. ===== */
+const FLOW=[
+ {icon:'tool-type',s:['Jenis','Type'],t:['Pilih jenis laman web','Pick a website type'],d:['Pilih satu daripada 4 jenis: Laman PdP, Laman pengurusan kerja, Acara atau Portfolio. Setiap jenis datang dengan menu dan bahagian yang sesuai.','Pick one of 4 types: a teaching & learning site, a work management site, an event or a portfolio. Each type comes with a menu and sections that fit.']},
+ {icon:'tool-style',s:['Gaya','Style'],t:['Pilih gaya reka bentuk','Pick a design style'],d:['Pilih Minimal profesional, Tajuk besar dan kontras atau Mesra dan berwarna. Warna dan fon berubah serta-merta.','Pick Professional minimalist, Bold headings and contrast, or Friendly and colourful. Colours and fonts change straight away.']},
+ {icon:'tool-content',s:['Kandungan','Content'],t:['Masukkan kandungan anda','Add your content'],d:['Taip nama laman, tajuk utama dan teks butang. Tambah imej, kemudian sunting atau susun semula bahagian.','Type your site name, headline and button text. Add an image, then edit or reorder the sections.']},
+ {icon:'export-download',s:['Muat turun','Download'],t:['Semak dan muat turun','Check and download'],d:['Lihat pratonton pada desktop, tablet dan telefon. Tekan Semak laman, kemudian Muat turun ZIP untuk mendapat fail laman web anda.','Preview on desktop, tablet and phone. Press Check website, then Download ZIP to get your website files.']},
+ {icon:'github',s:['Terbit','Publish'],t:['Terbitkan di GitHub Pages','Publish on GitHub Pages'],d:['Muat naik fail ke GitHub Pages untuk mendapat pautan awam yang boleh dikongsi dengan sesiapa sahaja.','Upload the files to GitHub Pages to get a public link you can share with anyone.']}
+];
+const flow=$('v41-flow');let flowStep=0,flowTimer=0,flowPlayed=false;
+function stopFlow(){clearInterval(flowTimer);flowTimer=0}
+function setFlow(i,user){
+ if(user)stopFlow();
+ flowStep=Math.max(0,Math.min(FLOW.length-1,i));if(!flow)return;
+ const n=FLOW.length,pct=flowStep/(n-1)*100,f=FLOW[flowStep],last=flowStep===n-1;
+ flow.querySelector('.v41-flow-fill').style.width=pct+'%';
+ const rocket=flow.querySelector('.v41-rocket');rocket.style.left=pct+'%';rocket.classList.toggle('liftoff',last);
+ flow.querySelectorAll('.v41-dot').forEach((d,j)=>{d.classList.toggle('done',j<flowStep);d.classList.toggle('now',j===flowStep);if(j===flowStep)d.setAttribute('aria-current','step');else d.removeAttribute('aria-current')});
+ const panel=flow.querySelector('.v41-flow-panel');
+ panel.querySelector('img').src='assets/icons/'+f.icon+'.webp';
+ panel.querySelector('.v41-flow-count').textContent=B('Langkah '+(flowStep+1)+' daripada '+n,'Step '+(flowStep+1)+' of '+n);
+ panel.querySelector('h3').textContent=B(f.t[0],f.t[1]);
+ panel.querySelector('p').textContent=B(f.d[0],f.d[1]);
+ const prev=panel.querySelector('.v41-prev'),nextB=panel.querySelector('.v41-next'),go=panel.querySelector('.v41-go'),guide=panel.querySelector('.v41-guide');
+ prev.disabled=flowStep===0;nextB.hidden=last;go.hidden=!last;guide.hidden=!last;
+ panel.classList.remove('swap');void panel.offsetWidth;panel.classList.add('swap');
+}
+function paintFlow(){
+ if(!flow)return;
+ flow.replaceChildren();
+ const intro=node('p','v41-flow-intro',B('Tekan mana-mana langkah, atau gunakan butang Seterusnya, untuk melihat roket bergerak daripada idea hingga laman web anda terbit.','Tap any step, or use Next, to watch the rocket travel from idea to a live website.'));
+ const rail=node('div','v41-flow-rail'),line=node('div','v41-flow-line'),fill=node('span','v41-flow-fill');line.append(fill);
+ const rocket=node('img','v41-rocket');rocket.src='assets/icons/launch.webp';rocket.alt='';
+ const dots=node('ol','v41-dots');
+ FLOW.forEach((f,i)=>{const li=node('li'),b=node('button','v41-dot');b.type='button';b.style.left=(i/(FLOW.length-1)*100)+'%';b.append(node('span','v41-dot-num',String(i+1)),node('span','v41-dot-label',B(f.s[0],f.s[1])));b.setAttribute('aria-label',B('Langkah ','Step ')+(i+1)+': '+B(f.t[0],f.t[1]));b.onclick=()=>setFlow(i,true);li.append(b);dots.append(li)});
+ rail.append(line,rocket,dots);
+ const panel=node('div','v41-flow-panel');panel.setAttribute('aria-live','polite');
+ const art=node('img','v41-flow-art');art.alt='';
+ const text=node('div','v41-flow-text');text.append(node('span','v41-flow-count',''),node('h3','',''),node('p','',''));
+ const nav=node('div','v41-flow-nav'),prev=node('button','v41-prev',B('← Sebelumnya','← Back')),nextB=node('button','v41-next',B('Seterusnya →','Next →')),go=node('button','v41-go',B('Lancarkan Studio ↗','Launch Studio ↗')),guide=node('a','v41-guide',B('Panduan terbit ↗','Publishing guide ↗'));
+ prev.type=nextB.type=go.type='button';guide.href=GUIDE;guide.target='_blank';guide.rel='noopener';
+ prev.onclick=()=>setFlow(flowStep-1,true);nextB.onclick=()=>setFlow(flowStep+1,true);go.onclick=()=>{stopFlow();showStudio()};
+ nav.append(prev,nextB,go,guide);text.append(nav);panel.append(art,text);
+ flow.append(intro,rail,panel);
+ setFlow(flowStep,false);
+}
+if(flow&&'IntersectionObserver' in window)new IntersectionObserver((es,ob)=>{if(!es[0].isIntersecting||flowPlayed)return;flowPlayed=true;ob.disconnect();if(reduced())return;flowTimer=setInterval(()=>{if(flowStep>=FLOW.length-1)return stopFlow();setFlow(flowStep+1,false)},2600)},{threshold:.5}).observe(flow);
+
+/* Text that the older scripts left in English: switched here with the language. */
+const EXTRA=[
+ ['.v403-hero-caption','Bayangkan. Reka. Terbitkan. ✦ Tanpa pengekodan.','Imagine it. Design it. Bring it live. ✦ No coding required.'],
+ ['.v403-showcase-head .eyebrow','4 JENIS LAMAN WEB','4 WEBSITE TYPES'],
+ ['.v403-showcase-head p','Terokai apa yang anda boleh bina, daripada portfolio hingga hab pembelajaran dan acara.','Explore what you can build, from portfolios to learning hubs and events.'],
+ ['.v403-marquee-hint','← Tekan satu jenis untuk mula →','← Tap a type to start →']
+];
+const EXTRA_HTML=[['.v403-showcase-head h2','Satu idea. <em>Pelbagai kemungkinan.</em>','One idea. <em>Many possibilities.</em>']];
+const EXTRA_ATTR=[
+ ['.topbar .brand','aria-label','Laman utama Web Wizard Studio','Web Wizard Studio home'],
+ ['.hero-art-wizard','aria-label','Web Wizard bersama alat pembangunan web','Web Wizard with web development tools'],
+ ['.hero-art-wizard img','alt','Ilustrasi Web Wizard dikelilingi alat pembangunan web','Illustration of the Web Wizard surrounded by web development tools'],
+ ['.studio-icon-ribbon','aria-label','Alat Studio','Studio tools'],
+ ['.v403-showcase','aria-label','Jenis laman web bergerak','Website types in motion'],
+ ['#back-home','aria-label','Kembali ke halaman utama','Back to welcome'],['#back-home','title','Kembali ke halaman utama','Back to welcome'],
+ ['.device-controls','aria-label','Peranti pratonton','Preview device'],
+ ['#preview-frame','title','Pratonton laman web yang dijana','Generated website preview'],
+ ['#close-dialog','aria-label','Tutup','Close dialog']
+];
+const RIBBON={Templates:['Templat','Templates'],Responsive:['Responsif','Responsive'],Publish:['Terbit','Publish']};
+function extraLabels(){
+ for(const [sel,bm,en] of EXTRA){const el=document.querySelector(sel);if(el)el.textContent=B(bm,en)}
+ for(const [sel,bm,en] of EXTRA_HTML){const el=document.querySelector(sel);if(el)el.innerHTML=B(bm,en)}
+ for(const [sel,attr,bm,en] of EXTRA_ATTR){const el=document.querySelector(sel);if(el)el.setAttribute(attr,B(bm,en))}
+ document.querySelectorAll('.studio-icon-ribbon span').forEach(el=>{const key=el.dataset.k||el.textContent.trim();if(RIBBON[key]){el.dataset.k=key;el.textContent=B(RIBBON[key][0],RIBBON[key][1])}});
+ document.querySelectorAll('.v403-type-card').forEach(b=>{const c=CATALOG[b.dataset.website],t=b.querySelector('b');if(c&&t)t.textContent=B(c.bm,c.en)});
 }
 
 /* Language switch keeps the user's edited text, then relabels the workspace. */
@@ -184,9 +291,9 @@ $('v4-check').onclick=()=>{
  if(!d.cta?.trim())todo.push(B('Tambah teks butang utama (langkah 3)','Add the main button text (step 3)'));
  if(!visibleSections().length)todo.push(B('Paparkan sekurang-kurangnya satu bahagian (langkah 4)','Show at least one section (step 4)'));
  if(visibleSections().some(x=>!x.title.trim()))todo.push(B('Beri tajuk kepada setiap bahagian (langkah 4)','Give every section a title (step 4)'));
- if(!state.heroImg)tips.push(B('Tambah imej hero supaya laman lebih menarik (langkah 3)','Add a hero image to make the site more inviting (step 3)'));
+ if(!state.heroImg)tips.push(B('Tambah imej utama supaya laman lebih menarik (langkah 3)','Add a main image to make the site more inviting (step 3)'));
  tips.push(B('Gantikan semua kandungan contoh sebelum terbit','Replace all sample content before publishing'));
- tips.push(B('Uji pada telefon menggunakan butang Telefon di atas','Test on a phone using the Mobile button above'));
+ tips.push(B('Uji paparan telefon menggunakan butang Telefon di atas','Test on a phone using the Mobile button above'));
  alert((todo.length?B('Perlu dibaiki:','To fix:')+'\n• '+todo.join('\n• ')+'\n\n':B('Semakan asas lulus.','Basic checks passed.')+'\n\n')+B('Cadangan:','Suggestions:')+'\n• '+tips.join('\n• '));
 };
 
@@ -195,9 +302,133 @@ const encoder=new TextEncoder();const crcTable=Array.from({length:256},(_,n)=>{l
 function zip(files){const chunks=[],directory=[];let offset=0;function u16(a,n){a.push(n&255,(n>>>8)&255)}function u32(a,n){u16(a,n);u16(a,n>>>16)}for(const [name,content] of files){const fn=encoder.encode(name),bytes=content instanceof Uint8Array?content:encoder.encode(content),sum=crc(bytes),local=[];u32(local,0x04034b50);u16(local,20);u16(local,0x0800);u16(local,0);u16(local,0);u16(local,0x21);u32(local,sum);u32(local,bytes.length);u32(local,bytes.length);u16(local,fn.length);u16(local,0);chunks.push(new Uint8Array(local),fn,bytes);const central=[];u32(central,0x02014b50);u16(central,20);u16(central,20);u16(central,0x0800);u16(central,0);u16(central,0);u16(central,0x21);u32(central,sum);u32(central,bytes.length);u32(central,bytes.length);u16(central,fn.length);u16(central,0);u16(central,0);u16(central,0);u16(central,0);u32(central,0);u32(central,offset);directory.push(new Uint8Array(central),fn);offset+=local.length+fn.length+bytes.length}const start=offset;for(const d of directory){chunks.push(d);offset+=d.length}const end=[];u32(end,0x06054b50);u16(end,0);u16(end,0);u16(end,files.length);u16(end,files.length);u32(end,offset-start);u32(end,start);u16(end,0);chunks.push(new Uint8Array(end));return new Blob(chunks,{type:'application/zip'})}
 $('v4-zip').onclick=()=>{const site=window.WWSite;download(site.slug()+'.zip',zip(site.files()));setStatus('zip');next.hidden=false;paintNext()};
 
-$('reset-all').onclick=()=>{if(!confirm(B('Tetapkan semula semua? Teks, warna, imej dan bahagian anda akan dipadam.','Reset everything? Your text, colours, image and sections will be cleared.')))return;state.type='agency';state.style='min';state.overrides={};state.colors={};state.device='desktop';state.siteName='';state.heroImg='';sections={};render();notify(B('Reka bentuk ditetapkan semula','Design reset'));later()};
+$('reset-all').onclick=()=>{if(!confirm(B('Set semula semuanya? Teks, warna, imej dan bahagian anda akan dipadamkan.','Reset everything? Your text, colours, image and sections will be cleared.')))return;state.type='lms';state.style='min';state.overrides={};state.colors={};state.device='desktop';state.siteName='';state.heroImg='';sections={};render();notify(B('Reka bentuk telah diset semula','Design reset'));later()};
+
+
+/* ---------- AI fill: one prompt + CV in, one JSON out, every text field filled ---------- */
+const FILL={n:5,lang:'',open:false};
+const fillCard=node('section','v4-fill');
+root.insertBefore(fillCard,bar);
+function fillLang(){return FILL.lang||state.lang}
+function fillPrompt(){
+ const bm=fillLang()==='bm',c=CATALOG[state.type]||{},tn=tr((c.bm||'')+'|'+(c.en||'')),
+  sug=(c.nav||[]).slice(1).map(x=>String(x).split('|')[bm?0:1]).filter(Boolean).join(', ');
+ if(bm)return `Anda pembantu menulis kandungan laman web untuk pemula.
+
+TUGAS
+Baca maklumat saya (CV, resume, profil atau nota) yang saya lampirkan atau tampal selepas prompt ini. Tulis kandungan untuk laman web jenis "${tn}", kemudian keluarkan SATU blok JSON sahaja.
+
+PERATURAN
+1. Guna hanya maklumat daripada CV/maklumat saya. JANGAN reka nama, tarikh, statistik, anugerah, testimoni atau pautan.
+2. Jika sesuatu tiada dalam maklumat saya, tulis "(isi di sini)".
+3. Jangan masukkan no. IC, alamat rumah, no. telefon peribadi atau data sulit.
+4. Tulis dalam Bahasa Melayu yang mudah dan mesra (gaya Malaysia). Ayat pendek.
+5. Letakkan TEPAT ${FILL.n} bahagian dalam "sections", disusun mengikut apa yang paling berguna kepada pelawat.
+6. Panjang maksimum (aksara): siteName 40, title 70, desc 160, cta 24, tajuk bahagian 40, penerangan bahagian 200.
+7. Berikan JSON sahaja dalam satu blok kod. Tiada penjelasan lain.
+
+FORMAT (gantikan contoh dengan nilai sebenar)
+{
+  "ww_site": 1,
+  "siteName": "Nama laman atau nama saya",
+  "title": "Tajuk utama yang menarik",
+  "desc": "Satu atau dua ayat pengenalan",
+  "cta": "Teks butang utama",
+  "sections": [
+    {"title": "Tajuk bahagian 1", "desc": "Penerangan ringkas bahagian 1"}
+  ]
+}
+
+Cadangan bahagian untuk jenis laman ini: ${sug||'Tentang, Projek, Hubungi'}.
+
+MAKLUMAT SAYA (tampal CV atau nota di bawah, atau lampirkan fail CV):
+`;
+ return `You are a website content assistant for beginners.
+
+TASK
+Read my information (CV, resume, profile or notes) that I attach or paste after this prompt. Write the content for a "${tn}" website, then output ONE JSON block only.
+
+RULES
+1. Use only information from my CV/notes. Do NOT invent names, dates, statistics, awards, testimonials or links.
+2. If something is missing from my information, write "(fill in)".
+3. Do not include IC numbers, home addresses, personal phone numbers or confidential data.
+4. Write in simple, friendly English with short sentences.
+5. Put EXACTLY ${FILL.n} sections in "sections", ordered by what is most useful to visitors.
+6. Maximum length (characters): siteName 40, title 70, desc 160, cta 24, section title 40, section description 200.
+7. Give the JSON only, in one code block. No other explanation.
+
+FORMAT (replace the examples with real values)
+{
+  "ww_site": 1,
+  "siteName": "Site name or my name",
+  "title": "An engaging main headline",
+  "desc": "One or two introduction sentences",
+  "cta": "Main button text",
+  "sections": [
+    {"title": "Section 1 title", "desc": "Short description of section 1"}
+  ]
+}
+
+Suggested sections for this website type: ${sug||'About, Projects, Contact'}.
+
+MY INFORMATION (paste your CV or notes below, or attach your CV file):
+`}
+function fillParse(t){
+ t=String(t||'').replace(/[“”]/g,'"');const i=t.indexOf('"ww_site"');if(i<0)return null;
+ const st=t.lastIndexOf('{',i);if(st<0)return null;let d=0,inStr=false,esc=false;
+ for(let j=st;j<t.length;j++){const ch=t[j];
+  if(inStr){if(esc)esc=false;else if(ch==='\\')esc=true;else if(ch==='"')inStr=false;continue}
+  if(ch==='"'){inStr=true;continue}
+  if(ch==='{')d++;else if(ch==='}'){d--;if(!d){const raw=t.slice(st,j+1);try{return JSON.parse(raw)}catch(e){try{return JSON.parse(raw.replace(/,\s*([}\]])/g,'$1'))}catch(e2){return null}}}}}
+ return null}
+const clamp=(v,n)=>String(v==null?'':v).replace(/\s+/g,' ').trim().slice(0,n);
+function fillApply(o){
+ const did=[],name=clamp(o.siteName,60),title=clamp(o.title,100),desc=clamp(o.desc,240),cta=clamp(o.cta,40);
+ if(name){state.siteName=name;did.push(B('nama laman','site name'))}
+ const ov={...state.overrides};
+ if(title){ov.title=title;did.push(B('tajuk utama','headline'))}
+ if(desc){ov.desc=desc;did.push(B('pengenalan','introduction'))}
+ if(cta){ov.cta=cta;did.push(B('butang','button'))}
+ state.overrides=ov;
+ const list=Array.isArray(o.sections)?o.sections.map(s=>({k:-1,title:clamp(s&&s.title,80),desc:clamp(s&&s.desc,320),visible:true})).filter(s=>s.title||s.desc).slice(0,10):[];
+ if(list.length){sections[state.type]=list;did.push(list.length+' '+B('bahagian','sections'))}
+ render();if(active==='sections')drawEditor();later();
+ return did}
+function paintFill(){
+ const bm=state.lang==='bm',fl=fillLang();
+ const sizes=[[3,B('Ringkas','Short'),B('3 bahagian','3 sections')],[5,B('Sederhana','Medium'),B('5 bahagian','5 sections')],[7,B('Lengkap','Full'),B('7 bahagian','7 sections')]];
+ fillCard.innerHTML='';
+ const head=node('button','v4-fill-head');head.type='button';head.setAttribute('aria-expanded',String(FILL.open));
+ head.append(node('span','v4-fill-ic','⚡'),(()=>{const d=node('span','v4-fill-txt');d.append(node('strong','',B('Ada CV atau maklumat? Isi semua sekali dengan AI','Have a CV or notes? Fill everything in one go with AI')),node('small','',B('Tampal 1 prompt dalam ChatGPT, Claude atau Gemini bersama CV anda. Tak perlu taip satu-satu.','Paste 1 prompt into ChatGPT, Claude or Gemini with your CV. No typing field by field.')));return d})(),node('span','v4-fill-go',FILL.open?B('Tutup ▴','Close ▴'):B('Mula ▾','Start ▾')));
+ head.onclick=()=>{FILL.open=!FILL.open;paintFill()};fillCard.append(head);
+ if(!FILL.open)return;
+ const bodyEl=node('div','v4-fill-body');
+ const s1=node('div','v4-fill-step');s1.append(node('b','',B('1. Pilih saiz laman dan bahasa','1. Choose the site size and language')));
+ const row=node('div','v4-fill-chips');
+ sizes.forEach(([n,l,d])=>{const b=node('button','v4-chip'+(FILL.n===n?' on':''),l+' · '+d);b.type='button';b.setAttribute('aria-pressed',String(FILL.n===n));b.onclick=()=>{FILL.n=n;paintFill()};row.append(b)});
+ [['bm','BM'],['en','EN']].forEach(([k,l])=>{const b=node('button','v4-chip lang'+(fl===k?' on':''),B('Bahasa: ','Language: ')+l);b.type='button';b.setAttribute('aria-pressed',String(fl===k));b.onclick=()=>{FILL.lang=k;paintFill()};row.append(b)});
+ s1.append(row);
+ const s2=node('div','v4-fill-step');s2.append(node('b','',B('2. Salin prompt, tampal dalam AI, lampirkan CV anda','2. Copy the prompt, paste it into your AI, attach your CV')));
+ const ta=node('textarea','v4-fill-prompt');ta.readOnly=true;ta.rows=7;ta.value=fillPrompt();ta.setAttribute('aria-label',B('Prompt untuk AI','Prompt for AI'));
+ const cp=node('button','v4-fill-btn',B('📋 Salin prompt','📋 Copy prompt'));cp.type='button';
+ cp.onclick=async()=>{try{await navigator.clipboard.writeText(ta.value)}catch(e){ta.select();document.execCommand&&document.execCommand('copy')}cp.textContent=B('✓ Disalin. Tampal dalam AI anda','✓ Copied. Paste it into your AI');setTimeout(()=>{cp.textContent=B('📋 Salin prompt','📋 Copy prompt')},2200)};
+ const tip=node('p','v4-fill-tip',B('Dalam ChatGPT/Claude/Gemini: tampal prompt ini, kemudian lampirkan fail CV (PDF/Word) atau tampal teks CV di hujung. Anda boleh sunting maklumat sebelum menghantar.','In ChatGPT/Claude/Gemini: paste this prompt, then attach your CV file (PDF/Word) or paste the CV text at the end. You can edit the details before sending.'));
+ s2.append(ta,cp,tip);
+ const s3=node('div','v4-fill-step');s3.append(node('b','',B('3. Tampal jawapan AI di sini','3. Paste the AI answer here')));
+ const ans=node('textarea','v4-fill-answer');ans.rows=5;ans.placeholder='{ "ww_site": 1, ... }';ans.setAttribute('aria-label',B('Jawapan AI','AI answer'));
+ const go=node('button','v4-fill-btn primary',B('✨ Isi semua laman saya','✨ Fill in my whole site'));go.type='button';
+ const msg=node('p','v4-fill-msg');msg.setAttribute('aria-live','polite');
+ go.onclick=()=>{const o=fillParse(ans.value);
+  if(!o){msg.className='v4-fill-msg bad';msg.textContent=B('Blok JSON tidak ditemui. Salin jawapan AI bermula dengan { "ww_site": 1 hingga } yang terakhir.','No JSON block found. Copy the AI answer starting at { "ww_site": 1 up to the last }.');return}
+  const did=fillApply(o);
+  if(!did.length){msg.className='v4-fill-msg bad';msg.textContent=B('Tiada nilai yang sah ditemui dalam jawapan itu.','No valid values were found in that answer.');return}
+  msg.className='v4-fill-msg ok';msg.textContent=B('Siap! Diisi: ','Done! Filled in: ')+did.join(', ')+'. '+B('Semak dan ubah di langkah 3 dan 4.','Check and edit in steps 3 and 4.');
+  notify(B('Laman anda sudah diisi','Your site is filled in'))};
+ s3.append(ans,go,msg);
+ bodyEl.append(s1,s2,s3);fillCard.append(bodyEl)}
 
 window.WebWizardV4={activate,save,zip,refresh,sections:visibleSections};
+window.addEventListener('load',extraLabels);document.addEventListener('DOMContentLoaded',extraLabels);
 gallery();restore();
 body.addEventListener('input',later,true);body.addEventListener('change',later,true);body.addEventListener('click',later,true);document.querySelectorAll('[data-device]').forEach(b=>b.addEventListener('click',later));window.addEventListener('beforeunload',save);
 })();
