@@ -262,7 +262,7 @@ const baseLang=changeLang;
 changeLang=function(lang){const keep=state.overrides;baseLang(lang);state.overrides=keep;render();relabel();gallery();later()};
 /* Any full render (type change, reset) refreshes an open section editor. */
 const baseRender=render;
-render=function(){baseRender();if(active==='sections')drawEditor()};
+render=function(){baseRender();if(active==='sections')drawEditor();try{paintFill()}catch(e){}};
 
 function applyProject(p){
  if(p.type in types)state.type=p.type;
@@ -307,6 +307,13 @@ $('reset-all').onclick=()=>{if(!confirm(B('Set semula semuanya? Teks, warna, ime
 
 /* ---------- AI fill: one prompt + CV in, one JSON out, every text field filled ---------- */
 const FILL={n:5,lang:'',open:false};
+const FILL_SRC={
+ lms:{h:['maklumat kursus','course information'],doc:['pro forma kursus, rancangan mengajar, senarai topik mingguan, CLO atau tarikh tugasan','the course pro forma, teaching plan, weekly topic list, CLOs or assignment dates'],up:['pro forma kursus atau nota','course pro forma or notes']},
+ office:{h:['maklumat unit','unit information'],doc:['senarai tugasan dan PIC, minit mesyuarat, tarikh penting, senarai SOP dan borang','the task list and people in charge, meeting minutes, key dates, list of SOPs and forms'],up:['senarai tugasan atau minit mesyuarat','task list or meeting minutes']},
+ conference:{h:['maklumat acara','event information'],doc:['kertas kerja, poster, atur cara/tentatif, senarai penceramah atau pautan pendaftaran','the proposal paper, poster, programme schedule, speaker list or registration link'],up:['kertas kerja atau poster acara','event proposal or poster']},
+ portfolio:{h:['CV atau resume','CV or resume'],doc:['CV, resume atau profil LinkedIn','CV, resume or LinkedIn profile'],up:['CV atau resume','CV or resume']}};
+function fillSrc(lang){const c=FILL_SRC[state.type]||FILL_SRC.portfolio,i=(lang||state.lang)==='en'?1:0;return {h:c.h[i],doc:c.doc[i],up:c.up[i]}}
+
 const fillCard=node('section','v4-fill');
 root.insertBefore(fillCard,bar);
 function fillLang(){return FILL.lang||state.lang}
@@ -316,10 +323,10 @@ function fillPrompt(){
  if(bm)return `Anda pembantu menulis kandungan laman web untuk pemula.
 
 TUGAS
-Baca maklumat saya (CV, resume, profil atau nota) yang saya lampirkan atau tampal selepas prompt ini. Tulis kandungan untuk laman web jenis "${tn}", kemudian keluarkan SATU blok JSON sahaja.
+Baca ${fillSrc('bm').h} yang saya lampirkan atau tampal selepas prompt ini (contoh: ${fillSrc('bm').doc}). Tulis kandungan untuk laman web jenis "${tn}", kemudian keluarkan SATU blok JSON sahaja.
 
 PERATURAN
-1. Guna hanya maklumat daripada CV/maklumat saya. JANGAN reka nama, tarikh, statistik, anugerah, testimoni atau pautan.
+1. Guna hanya maklumat daripada dokumen saya. JANGAN reka nama, tarikh, statistik, anugerah, testimoni atau pautan.
 2. Jika sesuatu tiada dalam maklumat saya, tulis "(isi di sini)".
 3. Jangan masukkan no. IC, alamat rumah, no. telefon peribadi atau data sulit.
 4. Tulis dalam Bahasa Melayu yang mudah dan mesra (gaya Malaysia). Ayat pendek.
@@ -341,15 +348,15 @@ FORMAT (gantikan contoh dengan nilai sebenar)
 
 Cadangan bahagian untuk jenis laman ini: ${sug||'Tentang, Projek, Hubungi'}.
 
-MAKLUMAT SAYA (tampal CV atau nota di bawah, atau lampirkan fail CV):
+MAKLUMAT SAYA (${fillSrc('bm').h}: tampal di bawah atau lampirkan fail):
 `;
  return `You are a website content assistant for beginners.
 
 TASK
-Read my information (CV, resume, profile or notes) that I attach or paste after this prompt. Write the content for a "${tn}" website, then output ONE JSON block only.
+Read my ${fillSrc('en').h} that I attach or paste after this prompt (for example ${fillSrc('en').doc}). Write the content for a "${tn}" website, then output ONE JSON block only.
 
 RULES
-1. Use only information from my CV/notes. Do NOT invent names, dates, statistics, awards, testimonials or links.
+1. Use only information from my documents. Do NOT invent names, dates, statistics, awards, testimonials or links.
 2. If something is missing from my information, write "(fill in)".
 3. Do not include IC numbers, home addresses, personal phone numbers or confidential data.
 4. Write in simple, friendly English with short sentences.
@@ -371,7 +378,7 @@ FORMAT (replace the examples with real values)
 
 Suggested sections for this website type: ${sug||'About, Projects, Contact'}.
 
-MY INFORMATION (paste your CV or notes below, or attach your CV file):
+MY INFORMATION (${fillSrc('en').h}: paste it below or attach the file):
 `}
 function fillParse(t){
  t=String(t||'').replace(/[“”]/g,'"');const i=t.indexOf('"ww_site"');if(i<0)return null;
@@ -399,7 +406,7 @@ function paintFill(){
  const sizes=[[3,B('Ringkas','Short'),B('3 bahagian','3 sections')],[5,B('Sederhana','Medium'),B('5 bahagian','5 sections')],[7,B('Lengkap','Full'),B('7 bahagian','7 sections')]];
  fillCard.innerHTML='';
  const head=node('button','v4-fill-head');head.type='button';head.setAttribute('aria-expanded',String(FILL.open));
- head.append(node('span','v4-fill-ic','⚡'),(()=>{const d=node('span','v4-fill-txt');d.append(node('strong','',B('Ada CV atau maklumat? Isi semua sekali dengan AI','Have a CV or notes? Fill everything in one go with AI')),node('small','',B('Tampal 1 prompt dalam ChatGPT, Claude atau Gemini bersama CV anda. Tak perlu taip satu-satu.','Paste 1 prompt into ChatGPT, Claude or Gemini with your CV. No typing field by field.')));return d})(),node('span','v4-fill-go',FILL.open?B('Tutup ▴','Close ▴'):B('Mula ▾','Start ▾')));
+ head.append(node('span','v4-fill-ic','⚡'),(()=>{const d=node('span','v4-fill-txt');d.append(node('strong','',B('Ada ','Have your ')+fillSrc().up+B('? Isi semua sekali dengan AI','? Fill everything in one go with AI')),node('small','',B('Tampal 1 prompt dalam ChatGPT, Claude atau Gemini bersama ','Paste 1 prompt into ChatGPT, Claude or Gemini with your ')+fillSrc().up+B('. Tak perlu taip satu-satu.','. No typing field by field.')));return d})(),node('span','v4-fill-go',FILL.open?B('Tutup ▴','Close ▴'):B('Mula ▾','Start ▾')));
  head.onclick=()=>{FILL.open=!FILL.open;paintFill()};fillCard.append(head);
  if(!FILL.open)return;
  const bodyEl=node('div','v4-fill-body');
@@ -408,11 +415,11 @@ function paintFill(){
  sizes.forEach(([n,l,d])=>{const b=node('button','v4-chip'+(FILL.n===n?' on':''),l+' · '+d);b.type='button';b.setAttribute('aria-pressed',String(FILL.n===n));b.onclick=()=>{FILL.n=n;paintFill()};row.append(b)});
  [['bm','BM'],['en','EN']].forEach(([k,l])=>{const b=node('button','v4-chip lang'+(fl===k?' on':''),B('Bahasa: ','Language: ')+l);b.type='button';b.setAttribute('aria-pressed',String(fl===k));b.onclick=()=>{FILL.lang=k;paintFill()};row.append(b)});
  s1.append(row);
- const s2=node('div','v4-fill-step');s2.append(node('b','',B('2. Salin prompt, tampal dalam AI, lampirkan CV anda','2. Copy the prompt, paste it into your AI, attach your CV')));
+ const s2=node('div','v4-fill-step');s2.append(node('b','',B('2. Salin prompt, tampal dalam AI, lampirkan ','2. Copy the prompt, paste it into your AI, attach your ')+fillSrc().up));
  const ta=node('textarea','v4-fill-prompt');ta.readOnly=true;ta.rows=7;ta.value=fillPrompt();ta.setAttribute('aria-label',B('Prompt untuk AI','Prompt for AI'));
  const cp=node('button','v4-fill-btn',B('📋 Salin prompt','📋 Copy prompt'));cp.type='button';
  cp.onclick=async()=>{try{await navigator.clipboard.writeText(ta.value)}catch(e){ta.select();document.execCommand&&document.execCommand('copy')}cp.textContent=B('✓ Disalin. Tampal dalam AI anda','✓ Copied. Paste it into your AI');setTimeout(()=>{cp.textContent=B('📋 Salin prompt','📋 Copy prompt')},2200)};
- const tip=node('p','v4-fill-tip',B('Dalam ChatGPT/Claude/Gemini: tampal prompt ini, kemudian lampirkan fail CV (PDF/Word) atau tampal teks CV di hujung. Anda boleh sunting maklumat sebelum menghantar.','In ChatGPT/Claude/Gemini: paste this prompt, then attach your CV file (PDF/Word) or paste the CV text at the end. You can edit the details before sending.'));
+ const tip=node('p','v4-fill-tip',B('Contoh dokumen: ','Example documents: ')+fillSrc().doc+B('. Lampirkan fail (PDF/Word/gambar) atau tampal teksnya di hujung prompt. Anda boleh sunting maklumat sebelum menghantar.','. Attach the file (PDF/Word/image) or paste its text at the end of the prompt. You can edit the details before sending.'));
  s2.append(ta,cp,tip);
  const s3=node('div','v4-fill-step');s3.append(node('b','',B('3. Tampal jawapan AI di sini','3. Paste the AI answer here')));
  const ans=node('textarea','v4-fill-answer');ans.rows=5;ans.placeholder='{ "ww_site": 1, ... }';ans.setAttribute('aria-label',B('Jawapan AI','AI answer'));
